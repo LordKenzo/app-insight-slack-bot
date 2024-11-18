@@ -2,6 +2,14 @@ name: Deploy Function to Azure Function App
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment where the artifact will be deployed.
+        required: false
+        default: "production"
+        type: choice
+        options:
+          - production
   push:
     branches: [main] # Aggiunto trigger automatico su push nel branch main
     paths:
@@ -12,7 +20,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-    environment: production # Aggiunto environment per migliore gestione dei segreti
+    environment: ${{ github.event.inputs.environment || 'production' }}
 
     steps:
       - name: Checkout code
@@ -21,14 +29,21 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20 LTS"
+          node-version: "20"
           cache: "npm" # Aggiunto caching per velocizzare il build
+
+      - name: Monitor Deployment Logs
+        run: |
+          az functionapp log tail --name ${{ secrets.AZURE_FUNCTION_APP_NAME }} \
+          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+          sleep 30 # per ottenere log recenti
 
       - name: Install dependencies
         run: npm ci
 
-      # - name: Run tests # Aggiunto step per i test
-      #  run: npm test
+      - name: Run tests
+        run: npm test
+        continue-on-error: false # Fallisce la pipeline se i test non passano
 
       # ... resto del file invariato ...
       - name: Build Function
@@ -37,7 +52,7 @@ jobs:
       - name: Create ZIP package (revised)
         run: |
           mkdir release
-          cp -r src/Helloworld/* release/  # Ensure all files from src/Helloworld are copied
+          cp -r dist/* release/
           cp package.json release/
           cp package-lock.json release/
           cd release
@@ -49,3 +64,6 @@ jobs:
           app-name: ${{ secrets.AZURE_FUNCTION_APP_NAME }} # Spostato in un secret
           package: release.zip
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+
+      - name: Clean up temporary files
+        run: rm -rf release release.zip
