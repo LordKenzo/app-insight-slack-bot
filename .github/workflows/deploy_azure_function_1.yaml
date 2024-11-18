@@ -20,20 +20,6 @@ on:
     paths:
       - "src/**" # Trigger solo quando ci sono modifiche nel codice sorgente
       - "package.json"
-    inputs:
-      resource_group_name:
-        description: The name of the workspace to create the artifact for.
-        required: true
-        type: choice
-        options:
-          - lf-itn-rg-bot
-      environment:
-        description: Environment where the artifact will be deployed.
-        required: false
-        default: "production"
-        type: choice
-        options:
-          - production
 
 env:
   BUNDLE_NAME: bundle
