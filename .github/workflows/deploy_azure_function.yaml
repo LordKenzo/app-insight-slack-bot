@@ -2,13 +2,6 @@ name: Deploy Azure Functions
 
 on:
   workflow_dispatch:
-    inputs:
-      workspace_name:
-        description: The name of the workspace to create the artifact for.
-        required: true
-        type: choice
-        options:
-          - lf-itn-func-bot
   push:
     branches:
       - main
@@ -21,7 +14,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     env:
-      WORKSPACE: ${{ inputs.workspace_name }}
+      WORKSPACE: "lf-itn-func-bot"
 
     steps:
       - name: Checkout code
