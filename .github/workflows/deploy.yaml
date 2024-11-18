@@ -61,7 +61,6 @@ jobs:
           cd ..
           echo "ZIP content:"
           unzip -l release.zip
-      
 
       - name: Deploy to Azure Function App
         uses: azure/functions-action@v1
@@ -70,6 +69,20 @@ jobs:
           package: release.zip
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
         continue-on-error: false # Specifica chiaramente il comportamento in caso di errore
+
+      - name: Debug Info
+        run: |
+          echo "Project structure:"
+          ls -R
+
+          echo "Build output:"
+          ls -R dist/
+
+          echo "Release content:"
+          ls -R release/
+
+          echo "ZIP content:"
+          unzip -l release.zip
 
       - name: Clean up temporary files
         run: rm -rf release release.zip
