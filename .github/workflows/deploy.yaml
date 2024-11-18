@@ -21,7 +21,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20"
+          node-version: "20 LTS"
           cache: "npm" # Aggiunto caching per velocizzare il build
 
       - name: Install dependencies
@@ -34,10 +34,10 @@ jobs:
       - name: Build Function
         run: npm run build # Assicurati di avere questo script nel package.json
 
-      - name: Create ZIP package
+      - name: Create ZIP package (revised)
         run: |
           mkdir release
-          cp -r dist/* release/
+          cp -r src/Helloworld/* release/  # Ensure all files from src/Helloworld are copied
           cp package.json release/
           cp package-lock.json release/
           cd release
