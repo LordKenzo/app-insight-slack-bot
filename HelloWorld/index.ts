@@ -1,28 +1,14 @@
-import {
-  app,
-  HttpRequest,
-  HttpResponseInit,
-  InvocationContext,
-} from "@azure/functions";
+import { app } from "@azure/functions";
 
-export async function helloWorld(
-  request: HttpRequest,
-  context: InvocationContext
-): Promise<HttpResponseInit> {
-  context.log("HTTP trigger function processed a request.");
-
-  const name = request.query.get("name") || "world";
-
-  return {
-    body: `Hello, ${name}!`,
-    headers: {
-      "Content-Type": "text/plain",
-    },
-  };
-}
-
-app.http("helloWorld", {
+app.http("httpTrigger1", {
   methods: ["GET", "POST"],
-  authLevel: "function",
-  handler: helloWorld,
+  authLevel: "anonymous",
+  route: "v1/slack",
+  handler: async (request, context) => {
+    context.log(`Http function processed request for url "${request.url}"`);
+
+    const name = request.query.get("name") || (await request.text()) || "world";
+
+    return { body: `Hello, ${name}!` };
+  },
 });
