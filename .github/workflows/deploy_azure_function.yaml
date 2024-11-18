@@ -2,9 +2,6 @@ name: Deploy Azure Functions
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
     inputs:
       workspace_name:
         description: The name of the workspace to create the artifact for.
@@ -12,6 +9,9 @@ on:
         type: choice
         options:
           - lf-itn-func-bot
+  push:
+    branches:
+      - main
 
 env:
   BUNDLE_NAME: bundle
@@ -43,12 +43,6 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Deploy to Azure Functions
-        uses: Azure/functions-action@v1
-        with:
-          app-name: ${{ secrets.AZURE_FUNCTION_APP_NAME }}
-          package: "./"
 
       - name: Deploy
         uses: azure/webapps-deploy@v2
