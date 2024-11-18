@@ -10,7 +10,6 @@ env:
   BUNDLE_NAME: bundle
   BASE_DIRECTORY: .
   RESOURCE_GROUP_NAME: lf-itn-rg-bot
-  WORKSPACE: "lf-itn-func-bot"
 
 jobs:
   build-and-deploy:
@@ -27,7 +26,7 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: ${{ env.BASE_DIRECTORY }}/${{ env.WORKSPACE }}
+        working-directory: ${{ env.BASE_DIRECTORY }}
 
       - name: Build project
         run: npm run build
