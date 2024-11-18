@@ -68,6 +68,8 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
 
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
     steps:
       - name: Deploy to Azure Function App
         uses: azure/functions-action@v1
