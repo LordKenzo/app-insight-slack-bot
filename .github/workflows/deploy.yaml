@@ -36,11 +36,6 @@ jobs:
           node-version: "20"
           cache: "npm" # Aggiunto caching per velocizzare il build
 
-      - name: Monitor Deployment Logs
-        run: |
-          timeout 30 az functionapp log tail --name ${{ secrets.AZURE_FUNCTION_APP_NAME }} \
-            --resource-group ${{ github.event.inputs.environment }} \
-
       - name: Install dependencies
         run: npm ci
 
