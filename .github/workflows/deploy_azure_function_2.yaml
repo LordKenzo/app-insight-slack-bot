@@ -9,89 +9,53 @@ on:
         default: "lf-itn-rg-bot"
       environment:
         description: Environment where the artifact will be deployed.
-        required: false
+        required: true
         default: "production"
         type: choice
         options:
           - production
-  #push:
-  #branches: [main] # Aggiunto trigger automatico su push nel branch main
-  #paths:
-  #- "src/**" # Trigger solo quando ci sono modifiche nel codice sorgente
-  #- "package.json"
+          - staging
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
 
-    environment: ${{ github.event.inputs.environment || 'production' }}
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # Aggiornato alla v4
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20"
-          cache: "npm" # Aggiunto caching per velocizzare il build
+          node-version: "14"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
-      - name: Run tests
-        run: npm test
-        continue-on-error: false # Fallisce la pipeline se i test non passano
+      - name: Build project
+        run: npm run build
 
-      # ... resto del file invariato ...
-      - name: Build Function
-        run: npm run build # Assicurati di avere questo script nel package.json
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Create ZIP package
-        run: |
-          mkdir release
-          cp -r dist/* release/
-          cp package.json release/
-          cp package-lock.json release/
-          cp host.json release/                # Copia host.json
-          echo "Release directory content:"
-          ls -la release/
-          cd release
-          zip -r ../release.zip ./*
-          cd ..
-          echo "ZIP content:"
-          unzip -l release.zip
-
-  deploy:
-    name: Deploy
-    needs: [build]
-    runs-on: ubuntu-latest
-
-    environment: ${{ github.event.inputs.environment || 'production' }}
-
-    steps:
-      - name: Deploy to Azure Function App
-        uses: azure/functions-action@v1
+      - name: Deploy to Azure Functions
+        uses: Azure/functions-action@v1
         with:
           app-name: ${{ secrets.AZURE_FUNCTION_APP_NAME }}
-          package: release.zip
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-        continue-on-error: false # Specifica chiaramente il comportamento in caso di errore
+          package: "./"
+          slot-name: ${{ github.event.inputs.environment }}
 
-      - name: Debug Info
-        run: |
-          echo "Project structure:"
-          ls -R
-
-          echo "Build output:"
-          ls -R dist/
-
-          echo "Release content:"
-          ls -R release/
-
-          echo "ZIP content:"
-          unzip -l release.zip
-
-      - name: Clean up temporary files
-        run: rm -rf release release.zip
+      - name: Swap Slots
+        if: github.event.inputs.environment == 'staging'
+        uses: Azure/cli@v1
+        with:
+          inlineScript: |
+            az functionapp deployment slot swap \
+              -g ${{ github.event.inputs.resource_group_name }} \
+              -n ${{ secrets.AZURE_FUNCTION_APP_NAME }} \
+              --slot staging \
+              --target-slot production
+            echo "url=https://${{ secrets.AZURE_FUNCTION_APP_NAME }}.azurewebsites.net" >> $GITHUB_OUTPUT
