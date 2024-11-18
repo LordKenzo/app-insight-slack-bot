@@ -3,6 +3,10 @@ name: Deploy Function to Azure Function App
 on:
   workflow_dispatch:
     inputs:
+      resource_group_name:
+        description: Function App resource group name.
+        required: true
+        default: "lf-itn-rg-bot"
       environment:
         description: Environment where the artifact will be deployed.
         required: false
@@ -34,9 +38,8 @@ jobs:
 
       - name: Monitor Deployment Logs
         run: |
-          az functionapp log tail --name ${{ secrets.AZURE_FUNCTION_APP_NAME }} \
-          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
-          sleep 30 # per ottenere log recenti
+          timeout 30 az functionapp log tail --name ${{ secrets.AZURE_FUNCTION_APP_NAME }} \
+            --resource-group ${{ github.event.inputs.environment }} \
 
       - name: Install dependencies
         run: npm ci
@@ -56,14 +59,15 @@ jobs:
           cp package.json release/
           cp package-lock.json release/
           cd release
-          zip -r ../release.zip ./*
+          zip -r9 ../release.zip ./*
 
       - name: Deploy to Azure Function App
         uses: azure/functions-action@v1
         with:
-          app-name: ${{ secrets.AZURE_FUNCTION_APP_NAME }} # Spostato in un secret
+          app-name: ${{ secrets.AZURE_FUNCTION_APP_NAME }}
           package: release.zip
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+        continue-on-error: false # Specifica chiaramente il comportamento in caso di errore
 
       - name: Clean up temporary files
         run: rm -rf release release.zip
