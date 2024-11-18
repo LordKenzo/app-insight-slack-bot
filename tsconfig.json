@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "moduleResolution": "Node",
     "target": "es6",
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "sourceMap": true,
-    "strict": false,
-    "experimentalDecorators": true
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   }
 }
