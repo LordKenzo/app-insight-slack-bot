@@ -1,4 +1,4 @@
-name: Deploy Azure Functions V.1
+name: Deploy Azure Functions V.2
 
 on:
   workflow_dispatch:
