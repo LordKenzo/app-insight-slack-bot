@@ -50,9 +50,10 @@ __azurite_db*__.json
 #############################
 # Terraform files to ignore #
 #############################
-.terraform          # Terraform cache
-*.tfstate           # a plaintext Terraform state file
+.terraform
+*.tfstate
 *.tfstate.backup
 *.tfstate.lock.*
+.terraform.lock.hcl
 
 appo/**
