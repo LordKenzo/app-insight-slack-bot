@@ -9,6 +9,7 @@ on:
 env:
   BUNDLE_NAME: bundle
   BASE_DIRECTORY: .
+  RESOURCE_GROUP_NAME: lf-itn-rg-bot
 
 jobs:
   build-and-deploy:
