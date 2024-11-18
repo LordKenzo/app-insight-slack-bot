@@ -106,11 +106,13 @@ jobs:
   deploy-to-production:
     name: Deploy To Production
     needs: [build]
+
     if: github.event_name == 'workflow_dispatch' && inputs.deploy_to_production == true
     runs-on: ubuntu-latest
     environment:
       name: production
       url: ${{ steps.swap-slots.outputs.url }}
+      RESOURCE_GROUP_NAME: ${{ inputs.resource_group_name }}
     steps:
       - name: Login to Azure
         uses: azure/login@v1
@@ -123,7 +125,7 @@ jobs:
         with:
           inlineScript: |
             az functionapp deployment slot swap \
-              -g ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              -g ${{ env.AZURE_RESOURCE_GROUP }} \
               -n ${{ secrets.AZURE_FUNCTION_APP_NAME }} \
               --slot staging \
               --target-slot production
