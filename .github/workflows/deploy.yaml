@@ -31,6 +31,17 @@ jobs:
       #  run: npm test
 
       # ... resto del file invariato ...
+      - name: Build Function
+        run: npm run build # Assicurati di avere questo script nel package.json
+
+      - name: Create ZIP package
+        run: |
+          mkdir release
+          cp -r dist/* release/
+          cp package.json release/
+          cp package-lock.json release/
+          cd release
+          zip -r ../release.zip ./*
 
       - name: Deploy to Azure Function App
         uses: azure/functions-action@v1
