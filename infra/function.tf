@@ -21,4 +21,9 @@ resource "azurerm_linux_function_app" "func_bot" {
       node_version = "20"
     }
   }
+
+  app_settings = {
+    "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.appinsights.instrumentation_key
+    "FUNCTIONS_WORKER_RUNTIME"       = "node"
+  }
 }
