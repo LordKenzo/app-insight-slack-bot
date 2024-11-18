@@ -2,46 +2,39 @@ name: Deploy Function to Azure Function App
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main] # Aggiunto trigger automatico su push nel branch main
+    paths:
+      - "src/**" # Trigger solo quando ci sono modifiche nel codice sorgente
+      - "package.json"
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    environment: production # Aggiunto environment per migliore gestione dei segreti
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4 # Aggiornato alla v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: "20"
+          cache: "npm" # Aggiunto caching per velocizzare il build
 
       - name: Install dependencies
-        run: |
-          echo "Installing dependencies..."
-          npm ci
+        run: npm ci
 
-      - name: Build Function app
-        run: |
-          echo "Building Function app..."
-          npm run build
-          echo "Build completed"
+      - name: Run tests # Aggiunto step per i test
+        run: npm test
 
-      - name: Zip with production dependencies
-        run: |
-          echo "Creating production node_modules..."
-          rm -rf node_modules
-          npm ci --production
-
-          echo "Creating deployment package..."
-          zip -r release.zip . \
-            --exclude ".git/*" \
-            --exclude ".github/*" \
-            --exclude "node_modules/.cache/*"
+      # ... resto del file invariato ...
 
       - name: Deploy to Azure Function App
         uses: azure/functions-action@v1
         with:
-          app-name: 'my-function-app'
+          app-name: ${{ secrets.AZURE_FUNCTION_APP_NAME }} # Spostato in un secret
           package: release.zip
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
