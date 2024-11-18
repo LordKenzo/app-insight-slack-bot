@@ -1,35 +1,88 @@
-name: Deploy Azure Functions
+name: Deploy Azure Function App
 
 on:
   workflow_dispatch:
-
-env:
-  BUNDLE_NAME: bundle
-  BASE_DIRECTORY: .
-  RESOURCE_GROUP_NAME: lf-itn-rg-bot
-  WORKSPACE: "lf-itn-func-bot"
+    inputs:
+      resource_group_name:
+        description: Function App resource group name.
+        required: true
+        default: "lf-itn-rg-bot"
+      environment:
+        description: Environment where the artifact will be deployed.
+        required: false
+        default: "production"
+        type: choice
+        options:
+          - production
+  push:
+    branches: [main] # Aggiunto trigger automatico su push nel branch main
+    paths:
+      - "src/**" # Trigger solo quando ci sono modifiche nel codice sorgente
+      - "package.json"
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4 # Aggiornato alla v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: "20"
+          cache: "npm" # Aggiunto caching per velocizzare il build
 
       - name: Install dependencies
-        run: npm install
-        working-directory: ${{ env.BASE_DIRECTORY }}/${{ env.WORKSPACE }}
+        run: npm ci
 
-      - name: Build project
-        run: npm run build
+      - name: Run tests
+        run: npm test
+        continue-on-error: false # Fallisce la pipeline se i test non passano
 
-      - name: Login to Azure
-        uses: azure/login@v1
+      # ... resto del file invariato ...
+      - name: Build Function
+        run: npm run build # Assicurati di avere questo script nel package.json
+
+      - name: Create ZIP package
+        run: |
+          mkdir release
+          cp -r dist/* release/
+          cp package.json release/
+          cp package-lock.json release/
+          cp host.json release/                # Copia host.json
+          echo "Release directory content:"
+          ls -la release/
+          cd release
+          zip -r ../release.zip ./*
+          cd ..
+          echo "ZIP content:"
+          unzip -l release.zip
+
+      - name: Deploy to Azure Function App
+        uses: azure/functions-action@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          app-name: ${{ secrets.AZURE_FUNCTION_APP_NAME }}
+          package: release.zip
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+        continue-on-error: false # Specifica chiaramente il comportamento in caso di errore
+
+      - name: Debug Info
+        run: |
+          echo "Project structure:"
+          ls -R
+
+          echo "Build output:"
+          ls -R dist/
+
+          echo "Release content:"
+          ls -R release/
+
+          echo "ZIP content:"
+          unzip -l release.zip
+
+      - name: Clean up temporary files
+        run: rm -rf release release.zip
