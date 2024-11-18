@@ -112,6 +112,7 @@ jobs:
     environment:
       name: production
       url: ${{ steps.swap-slots.outputs.url }}
+    env:
       RESOURCE_GROUP_NAME: ${{ inputs.resource_group_name }}
     steps:
       - name: Login to Azure
