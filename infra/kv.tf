@@ -13,7 +13,7 @@ data "azurerm_key_vault_secret" "appinsight_connection_string" {
   key_vault_id = data.azurerm_key_vault.key_vault.id
 }
 
-data "azurerm_role_assignment" "kv_secrets_user" {
+resource "azurerm_role_assignment" "kv_secrets_user" {
   scope                = data.azurerm_key_vault.key_vault.id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = var.client_id
