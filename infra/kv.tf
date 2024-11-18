@@ -13,13 +13,8 @@ data "azurerm_key_vault_secret" "appinsight_connection_string" {
   key_vault_id = data.azurerm_key_vault.key_vault.id
 }
 
-resource "azurerm_key_vault_access_policy" "terraform_sp" {
-  key_vault_id = data.azurerm_key_vault.key_vault.id
-  tenant_id    = var.tenant_id
-  object_id    = var.client_id    # Questo è l'object ID del service principal
-
-  secret_permissions = [
-    "Get",
-    "List"
-  ]
+data "azurerm_role_assignment" "kv_secrets_user" {
+  scope                = data.azurerm_key_vault.key_vault.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = var.client_id
 }
