@@ -5,11 +5,17 @@ on:
   push:
     branches:
       - main
+    inputs:
+      resource_group_name:
+        description: The name of the workspace to create the artifact for.
+        required: true
+        type: choice
+        options:
+          - lf-itn-rg-bot
 
 env:
   BUNDLE_NAME: bundle
   BASE_DIRECTORY: .
-  RESOURCE_GROUP_NAME: lf-itn-rg-bot
 
 jobs:
   build-and-deploy:
@@ -31,7 +37,33 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Build the Function App Artifact
+        id: make-function-app-artifact
+        run: |
+          npm pkg set --json "bundledDependencies"=true
+          npm pkg set --json "files"='["dist", "host.json"]'
+          npx npm-pack-zip
+          package_name=$(jq -r .name package.json)
+          mv ${package_name//\/}.zip ${{ env.BUNDLE_NAME }}.zip
+          echo "artifact-path=$(realpath ${{ env.BUNDLE_NAME }}.zip)" >> "$GITHUB_OUTPUT"
+        working-directory: ${{ env.BASE_DIRECTORY }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@694cdabd8bdb0f10b2cea11669e1bf5453eed0a6 # v4.2.0
+        with:
+          name: ${{ env.BUNDLE_NAME }}
+          path: ${{ steps.make-function-app-artifact.outputs.artifact-path }}
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy
+        uses: azure/webapps-deploy@v2
+        with:
+          resource-group-name: ${{ github.event.inputs.resource_group_name }}
+          app-name: ${{ secrets.AZURE_FUNCTION_APP_NAME }}
+          package: ${{ env.BUNDLE_NAME }}.zip
