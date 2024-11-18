@@ -126,7 +126,7 @@ jobs:
         with:
           inlineScript: |
             az functionapp deployment slot swap \
-              -g ${{ env.AZURE_RESOURCE_GROUP }} \
+              -g ${{ env.RESOURCE_GROUP_NAME }} \
               -n ${{ secrets.AZURE_FUNCTION_APP_NAME }} \
               --slot staging \
               --target-slot production
