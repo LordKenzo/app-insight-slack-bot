@@ -14,11 +14,11 @@ on:
         type: choice
         options:
           - production
-  push:
-    branches: [main] # Aggiunto trigger automatico su push nel branch main
-    paths:
-      - "src/**" # Trigger solo quando ci sono modifiche nel codice sorgente
-      - "package.json"
+  #push:
+  #branches: [main] # Aggiunto trigger automatico su push nel branch main
+  #paths:
+  #- "src/**" # Trigger solo quando ci sono modifiche nel codice sorgente
+  #- "package.json"
 
 jobs:
   build:

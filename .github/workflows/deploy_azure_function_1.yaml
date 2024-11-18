@@ -3,6 +3,11 @@ name: Deploy Azure Functions V.1
 on:
   workflow_dispatch:
     inputs:
+      deploy_to_production:
+        description: 'Deploy to production?'
+        type: boolean
+        required: true
+        default: false
       resource_group_name:
         description: The name of the workspace to create the artifact for.
         required: true
@@ -106,3 +111,29 @@ jobs:
           resource-group-name: ${{ github.event.inputs.resource_group_name }}
           app-name: ${{ secrets.AZURE_FUNCTION_APP_NAME }}
           package: ${{ env.BUNDLE_NAME }}.zip
+          slot-name: "staging"
+
+  deploy-to-production:
+    needs: [build]
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_to_production == true
+    runs-on: ubuntu-latest
+    environment: 
+      name: production
+      url: ${{ steps.swap-slots.outputs.url }}
+    steps:
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Swap Slots
+        id: swap-slots
+        uses: Azure/cli@v1
+        with:
+          inlineScript: |
+            az functionapp deployment slot swap \
+              --name ${{ secrets.AZURE_FUNCTION_APP_NAME }} \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --slot staging \
+              --target-slot production
+            echo "url=https://${{ secrets.AZURE_FUNCTION_APP_NAME }}.azurewebsites.net" >> $GITHUB_OUTPUT
