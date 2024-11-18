@@ -18,7 +18,8 @@ env:
   BASE_DIRECTORY: .
 
 jobs:
-  build-and-deploy:
+  build:
+    name: Build Artifact
     runs-on: ubuntu-latest
 
     steps:
@@ -55,6 +56,16 @@ jobs:
           path: ${{ steps.make-function-app-artifact.outputs.artifact-path }}
           if-no-files-found: error
           retention-days: 7
+
+  deploy:
+    name: Deploy
+    needs: [build]
+
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        with:
+          name: ${{ env.BUNDLE_NAME }}
 
       - name: Login to Azure
         uses: azure/login@v1
