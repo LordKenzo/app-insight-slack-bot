@@ -5,16 +5,24 @@ import {
   InvocationContext,
 } from "@azure/functions";
 
-export async function httpTrigger(
+export async function helloWorld(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   context.log("HTTP trigger function processed a request.");
-  return { body: `Hello!` };
+
+  const name = request.query.get("name") || "world";
+
+  return {
+    body: `Hello, ${name}!`,
+    headers: {
+      "Content-Type": "text/plain",
+    },
+  };
 }
 
-app.http("httpTrigger", {
+app.http("helloWorld", {
   methods: ["GET", "POST"],
   authLevel: "function",
-  handler: httpTrigger,
+  handler: helloWorld,
 });

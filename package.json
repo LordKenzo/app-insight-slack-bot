@@ -2,14 +2,15 @@
   "name": "botinsight",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/**/*/index.js",
+  "main": "dist/functions/**/index.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
     "clean": "rimraf dist",
     "prestart": "npm run clean && npm run build",
     "start": "func start",
-    "test": "echo \"No tests yet...\""
+    "test": "echo \"No tests yet...\"",
+    "postbuild": "cp host.json dist/"
   },
   "dependencies": {
     "@azure/functions": "^4.0.0"
