@@ -14,13 +14,7 @@ on:
         type: choice
         options:
           - lf-itn-rg-bot
-      environment:
-        description: Environment where the artifact will be deployed.
-        required: false
-        default: "production"
-        type: choice
-        options:
-          - production
+
   push:
     branches: [main] # Aggiunto trigger automatico su push nel branch main
     paths:
@@ -49,8 +43,6 @@ jobs:
   build:
     name: Build Artifact
     runs-on: ubuntu-latest
-
-    environment: ${{ github.event.inputs.environment || 'production' }}
 
     steps:
       - name: Checkout code
@@ -91,8 +83,6 @@ jobs:
     name: Deploy
     needs: [build]
     runs-on: ubuntu-latest
-
-    environment: ${{ github.event.inputs.environment || 'production' }}
 
     steps:
       - name: Download Artifact
