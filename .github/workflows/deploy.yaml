@@ -47,14 +47,21 @@ jobs:
       - name: Build Function
         run: npm run build # Assicurati di avere questo script nel package.json
 
-      - name: Create ZIP package (revised)
+      - name: Create ZIP package
         run: |
           mkdir release
           cp -r dist/* release/
           cp package.json release/
           cp package-lock.json release/
+          cp host.json release/                # Copia host.json
+          echo "Release directory content:"
+          ls -la release/
           cd release
-          zip -r9 ../release.zip ./*
+          zip -r ../release.zip ./*
+          cd ..
+          echo "ZIP content:"
+          unzip -l release.zip
+      
 
       - name: Deploy to Azure Function App
         uses: azure/functions-action@v1
