@@ -1,4 +1,4 @@
-name: Deploy Function to Azure Function App
+name: Deploy Azure Functions V.1
 
 on:
   workflow_dispatch:
@@ -21,7 +21,8 @@ on:
       - "package.json"
 
 jobs:
-  build-and-deploy:
+  build:
+    name: Build
     runs-on: ubuntu-latest
 
     environment: ${{ github.event.inputs.environment || 'production' }}
@@ -62,6 +63,12 @@ jobs:
           echo "ZIP content:"
           unzip -l release.zip
 
+  deploy:
+    name: Deploy
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Deploy to Azure Function App
         uses: azure/functions-action@v1
         with:
