@@ -40,6 +40,7 @@ env:
   BASE_DIRECTORY: .
 
 jobs:
+  name: Deploy Azure Functions V.1
   build:
     name: Build Artifact
     runs-on: ubuntu-latest
@@ -123,8 +124,8 @@ jobs:
         with:
           inlineScript: |
             az functionapp deployment slot swap \
-              --name ${{ secrets.AZURE_FUNCTION_APP_NAME }} \
-              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              -g ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              -n ${{ secrets.AZURE_FUNCTION_APP_NAME }} \
               --slot staging \
               --target-slot production
             echo "url=https://${{ secrets.AZURE_FUNCTION_APP_NAME }}.azurewebsites.net" >> $GITHUB_OUTPUT
