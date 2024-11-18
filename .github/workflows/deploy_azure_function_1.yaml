@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       deploy_to_production:
-        description: 'Deploy to production?'
+        description: "Deploy to production?"
         type: boolean
         required: true
         default: false
@@ -80,7 +80,7 @@ jobs:
           retention-days: 7
 
   deploy:
-    name: Deploy
+    name: Deploy To Staging
     needs: [build]
     runs-on: ubuntu-latest
 
@@ -104,10 +104,11 @@ jobs:
           slot-name: "staging"
 
   deploy-to-production:
+    name: Deploy To Production
     needs: [build]
     if: github.event_name == 'workflow_dispatch' && inputs.deploy_to_production == true
     runs-on: ubuntu-latest
-    environment: 
+    environment:
       name: production
       url: ${{ steps.swap-slots.outputs.url }}
     steps:
