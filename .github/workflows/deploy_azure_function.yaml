@@ -2,6 +2,9 @@ name: Deploy Azure Functions
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
     inputs:
       workspace_name:
         description: The name of the workspace to create the artifact for.
@@ -9,15 +12,12 @@ on:
         type: choice
         options:
           - lf-itn-func-bot
-  push:
-    branches:
-      - main
+
+env:
+  BUNDLE_NAME: bundle
+  BASE_DIRECTORY: .
 
 jobs:
-  env:
-    BUNDLE_NAME: bundle
-    BASE_DIRECTORY: .
-
   build-and-deploy:
     runs-on: ubuntu-latest
     env:
