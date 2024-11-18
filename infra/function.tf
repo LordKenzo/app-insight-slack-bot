@@ -41,7 +41,8 @@ resource "azurerm_linux_function_app_slot" "func_bot_staging" {
   }
 
   app_settings = {
-    "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.appinsights.instrumentation_key
-    "FUNCTIONS_WORKER_RUNTIME"       = "node"
+    "APPINSIGHTS_INSTRUMENTATIONKEY"        = azurerm_application_insights.appinsights.instrumentation_key
+    "APPLICATIONINSIGHTS-CONNECTION-STRING" = "${data.azurerm_key_vault_secret.appinsight_connection_string.value}"
+    "FUNCTIONS_WORKER_RUNTIME"              = "node"
   }
 }
