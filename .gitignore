@@ -46,3 +46,13 @@ __pycache__/
 __blobstorage__
 __queuestorage__
 __azurite_db*__.json
+
+#############################
+# Terraform files to ignore #
+#############################
+.terraform          # Terraform cache
+*.tfstate           # a plaintext Terraform state file
+*.tfstate.backup
+*.tfstate.lock.*
+
+appo/**
