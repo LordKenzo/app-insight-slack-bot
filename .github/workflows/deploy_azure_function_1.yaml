@@ -40,7 +40,6 @@ env:
   BASE_DIRECTORY: .
 
 jobs:
-  name: Deploy Azure Functions V.1
   build:
     name: Build Artifact
     runs-on: ubuntu-latest
