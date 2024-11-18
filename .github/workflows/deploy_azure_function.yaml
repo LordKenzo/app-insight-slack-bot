@@ -2,20 +2,16 @@ name: Deploy Azure Functions
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 env:
   BUNDLE_NAME: bundle
   BASE_DIRECTORY: .
   RESOURCE_GROUP_NAME: lf-itn-rg-bot
+  WORKSPACE: "lf-itn-func-bot"
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    env:
-      WORKSPACE: "lf-itn-func-bot"
 
     steps:
       - name: Checkout code
@@ -37,10 +33,3 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Deploy
-        uses: azure/webapps-deploy@v2
-        with:
-          resource-group-name: ${{ env.RESOURCE_GROUP_NAME }}
-          app-name: ${{ secrets.AZURE_FUNCTION_APP_NAME }}
-          package: ${{ env.BUNDLE_NAME }}.zip
