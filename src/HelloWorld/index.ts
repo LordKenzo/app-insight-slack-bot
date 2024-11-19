@@ -6,14 +6,19 @@ app.http("httpTrigger1", {
   authLevel: "anonymous",
   route: "v1/slack",
   handler: async (request, context) => {
-    const client = initTelemetryClient(5);
-    const errorClient = initTelemetryClient(100);
+
+  // Client per errori critici con campionamento al 100%
+  const criticalErrorClient = initTelemetryClient("criticalErrorClient", 100);
+
+  // Client per errori non critici con campionamento al 5%
+  const nonCriticalErrorClient = initTelemetryClient("nonCriticalErrorClient", 5);
+
 
     context.log(`Http function processed request for url "${request.url}"`);
 
     const name = request.query.get("name") || (await request.text()) || "World";
 
-    client.trackEvent({
+    nonCriticalErrorClient.trackEvent({
       name: `helloworld-http-trigger`,
       properties: {
         request: request.url,
@@ -21,7 +26,7 @@ app.http("httpTrigger1", {
       },
     });
 
-    errorClient.trackEvent({
+    criticalErrorClient.trackEvent({
       name: `helloworld-http-trigger-sample-error`,
       properties: {
         request: request.url,
