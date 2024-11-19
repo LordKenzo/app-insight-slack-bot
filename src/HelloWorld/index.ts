@@ -1,5 +1,5 @@
 import { app } from "@azure/functions";
-import { initTelemetryClient } from "../utils/appinsight";
+import { initTelemetryClient } from "../../utils/appinsight";
 
 app.http("httpTrigger1", {
   methods: ["GET", "POST"],
